@@ -47,6 +47,7 @@ create table NhanVien(
     foreign key (idbophan) references BoPhan(idbophan)
 );
 ALTER TABLE NhanVien Modify Hoten varchar(45);
+ALTER TABLE NhanVien change Hoten hoten varchar(45);
 insert into NhanVien(idnhanvien,Hoten,idvitri,idtrinhdo,idbophan,ngaysinh,socmnd,luong,sdt,email,diachi)
 values(1001,'Hoàng Văn Hiếu',5,2,1,'1999/01/06','197405491','15000000','0987654312','hieuvanhoang99@gmail.com','Quảng Trị');
 insert into NhanVien(idnhanvien,Hoten,idvitri,idtrinhdo,idbophan,ngaysinh,socmnd,luong,sdt,email,diachi)
@@ -181,15 +182,153 @@ insert into HopDongChiTiet(idhopdongchitiet,idhopdong,iddichvudikem,soluong)
 values(2,002,3,5);
 insert into HopDongChiTiet(idhopdongchitiet,idhopdong,iddichvudikem,soluong)
 values(3,003,4,2);
+insert into HopDongChiTiet(idhopdongchitiet,idhopdong,iddichvudikem,soluong)
+values(4,001,4,2);
+insert into HopDongChiTiet(idhopdongchitiet,idhopdong,iddichvudikem,soluong)
+values(5,001,3,2);
 select *from HopDongChiTiet;
 
+--- cau2
 select * from nhanvien where Hoten like 'H%_____________' or Hoten like 'T%_____________' or Hoten like 'K%_____________';
 
+--- cau3
 select * from khachhang where  diachi in ('Quảng Trị', 'Đà Nẵng') and year(CURDATE()) - year(ngaysinh) between 18 and 50;
 
-select count(*) from hopdong where idkhachhang in (
-select k.idkhachhang from khachhang k inner join loaikhach l
-on k.idloaikhach = l.idloaikhach
-where l.tenloaikhach like 'Diamond');
+--- cau4
+select a.idkhachhang, a.hoten, count(b.idkhachhang)as solandatphong
+from khachhang a, hopdong b
+where a.idkhachhang=b.idkhachhang and a.idloaikhach = 01
+group by a.hoten
+order by solandatphong asc;
+
+--- cau5
+select kh.idkhachhang, kh.hoten, lk.tenloaikhach, hd.idhopdong,
+dv.tendichvu, hd.ngaylamhopdong, hd.ngayketthuc, (dv.chiphithue+hdct.soluong*dvdk.gia) as TongTien
+from KhachHang as kh  
+left join LoaiKhach as lk on lk.idloaikhach=kh.idloaikhach
+left join hopdong as hd on kh.idkhachhang = hd.idkhachhang
+left join dichvu as dv on dv.iddichvu=hd.iddichvu
+left join hopdongchitiet as hdct on hdct.idhopdong=hd.idhopdong 
+left join dichvudikem as dvdk on dvdk.iddichvudikem=hdct.iddichvudikem;
+
+--- cau6
+select dv.iddichvu,dv.tendichvu,dv.dientich,dv.chiphithue,ldv.tenloaidichvu,hd.ngaylamhopdong
+from dichvu as dv   
+ join hopdong as hd on dv.iddichvu = hd.iddichvu 
+ join loaidichvu as ldv on dv.idloaidichvu=ldv.idloaidichvu
+WHERE ngaylamhopdong <='2019/1/1';
+
+--- cau7
+select a.iddichvu,tendichvu,dientich,songuoitoida,chiphithue,b.tenloaidichvu
+from dichvu a, loaidichvu b, hopdong c, khachhang d
+where a.idloaidichvu=b.idloaidichvu and
+a.iddichvu=c.iddichvu and
+c.idkhachhang=d.idkhachhang and
+year(ngaylamhopdong) =2018 and year(ngaylamhopdong)<2019;
+
+--- cau8
+SELECT DISTINCT hoten FROM khachhang;
+SELECT hoten FROM khachhang GROUP BY hoten HAVING COUNT(idkhachhang) >= 1;
+SELECT hoten FROM khachhang UNION DISTINCT SELECT hoten FROM khachhang;
+
+--- cau9
+select month(ngaylamhopdong) as Thang, count(idkhachhang) as khachhang
+from hopdong 
+where year(ngaylamhopdong) = 2019  group by Thang order by Thang asc;
+
+--- cau10
+select hopdong.idhopdong, hopdong.ngaylamhopdong, hopdong.ngayketthuc, hopdong.tiendatcoc, dichvudikem.iddichvudikem
+from ((hopdongchitiet
+		inner join hopdong on hopdongchitiet.idhopdong = hopdong.idhopdong)
+        inner join dichvudikem on hopdongchitiet.iddichvudikem = dichvudikem.iddichvudikem)
+        having count(dichvudikem.iddichvudikem);
+
+--- cau11
+select a.iddichvudikem, a.tendichvudikem, a.gia, a.donvi, a.trangthaikhadung
+from dichvudikem as a  
+left join hopdongchitiet as d on a.iddichvudikem=d.iddichvudikem  
+left join hopdong as e on e.idhopdong=d.idhopdong  
+left join khachhang as c on c.idkhachhang=e.idkhachhang
+left join loaikhach as b on b.idloaikhach=c.idloaikhach
+where c.diachi like '%Vinh%' or c.diachi like '%Quảng Ngãi%';
+
+--- cau12 
+SELECT a.idhopdong, a.ngaylamhopdong , b.Hoten as TenNhanVien, c.Hoten as TenKhachHang, c.sdt as SDTKhachHang, d.tendichvu, a.tiendatcoc 
+FROM hopdong as a
+inner join nhanvien as b on a.idnhanvien = b.idnhanvien
+inner join khachhang as c on a.idkhachhang = c.idkhachhang
+inner join dichvu as d on a.iddichvu = d.iddichvu
+inner join hopdongchitiet as e on a.idhopdong= e.idhopdong
+inner join dichvudikem as f on f.iddichvudikem = e.iddichvudikem
+where (month(a.ngaylamhopdong) in (10,11,12) and year(a.ngaylamhopdong) = 2019)
+group by a.idhopdong
+;
+
+--- cau13
+select a.iddichvudikem, a.tendichvudikem, c.idkhachhang, d.hoten,count(b.iddichvudikem) as solan
+from dichvudikem a ,hopdongchitiet b ,hopdong c,khachhang d 
+where a.iddichvudikem=b.iddichvudikem and
+ b.idhopdong=c.idhopdong and
+ c.idkhachhang=d.idkhachhang 
+group by a.iddichvudikem, a.tendichvudikem, c.idkhachhang, d.hoten
+having solan =
+(select count(b.iddichvudikem) as solan
+from dichvudikem a ,hopdongchitiet b ,hopdong c,khachhang d 
+where a.iddichvudikem=b.iddichvudikem and
+ b.idhopdong=c.idhopdong and
+ c.idkhachhang=d.idkhachhang 
+group by a.iddichvudikem, a.tendichvudikem, c.idkhachhang, d.hoten
+order by solan desc
+limit 1);
+
+--- cau14
+Select b.idhopdong, c.tenloaidichvu, d.tendichvudikem, count(a.iddichvudikem) as solan
+From hopdongchitiet a,hopdong b, loaidichvu c, dichvudikem d, dichvu e
+where d.iddichvudikem=a.iddichvudikem and
+a.idhopdong=b.idhopdong and 
+e.iddichvu=b.iddichvu and
+c.idloaidichvu= e.idloaidichvu 
+group by b.idhopdong, c.tenloaidichvu, d.tendichvudikem
+having solan=1;
+
+--- cau15
+select c.idnhanvien,Hoten,a.trinhdo,b.tenbophan,sdt,diachi
+from trinhdo a,bophan b,nhanvien c, hopdong d
+where a.idtrinhdo=c.idtrinhdo and
+b.idbophan=c.idbophan  and
+d.idnhanvien = c.idnhanvien
+group by idnhanvien,Hoten,a.trinhdo,b.tenbophan,sdt,diachi
+having count(d.idhopdong)>=3;
+
+--- cau16
+delete from nhanvien nv
+where nv.idnhanvien not in(select  nv.idnhanvien from nhanvien
+inner join hopdong hd on nv.idnhanvien = hd.idnhanvien
+where year(hd.ngaylamhopdong) between 2017 and 2019);
+
+--- cau18
+delete from khachhang 
+where khachhang.idkhachhang not in(select distinct khachhang.idkhachhang from khachhang
+inner join hopdong hd on hd.idkhachhang = khachhang.idkhachhang
+where year(hd.ngaylamhopdong) <2020);
+
+--- cau17
+update khachhang set idloaikhach = 1 where 
+idkhachhang in (select distinct hopdong.idkhachhang from hopdong
+where (select sum(tongtien) from hopdong group by idkhachhang)>10000000 
+and year(ngaylamhopdong) = 2019) and idloaikhach = 2;
+
+--- cau19
+update dichvudikem 
+set gia = gia*2
+where iddichvudikem =
+(select a.iddichvudikem 
+from hopdongchitiet a, hopdong b where 
+soluong<=3 and year(b.ngaylamhopdong) = 2019);
+
+--- cau20
+SELECT idkhachhang as id,hoten,email,sdt,ngaysinh,diachi FROM khachhang
+UNION 
+SELECT idnhanvien as id,hoten,email,sdt,ngaysinh,diachi FROM nhanvien;
 
 
