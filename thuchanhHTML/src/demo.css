@@ -1,0 +1,68 @@
+h1{
+    color: #006600;
+}
+h2{
+    color: #0000FF;
+    font-size: 36px;
+}
+h3{
+    background: #FECFFD;
+    color: #FF3399;
+    font-weight: bold;
+    font-size: 36px;
+}
+
+.xd{
+    background: #FFFFCC;
+    text-align: center;
+    font-size: 19px;
+    font-style: italic;
+}
+.mx{
+    color: #0000FF;
+}
+.md{
+    color: red;
+}
+.mxl{
+    color: #006600;
+}
+.nen{
+    background: #A06D21;
+}
+
+.nd{
+    text-align: center;
+    color: #FFCC00;
+    font-weight: bold;
+    font-size: 36px;
+}
+.chu{
+    color: #FFFFFF;
+    font-size: 20px;
+    position: absolute;
+}
+
+.tieude{
+    color: cyan;
+    text-align: center;
+    font-size: 36px;
+    font-weight: bold;
+}
+.doan1{
+    background: #FECFFD;
+    color: #006600;
+}
+.cau05{
+    background: #CCCCCC;
+    color: #0000CC;
+    font-size: 20px;
+}
+.cau06{
+    color: sandybrown;
+    text-align: center;
+    font-weight: bold;
+    font-size: 36px;
+    border:sandybrown double;
+}
+
